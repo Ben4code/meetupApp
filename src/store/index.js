@@ -43,7 +43,7 @@ export const store = new Vuex.Store ({
         },
         loadedMeetup(state){
             return (meetupId) =>{
-                return state.loadedMeetups.find((meetup)=>{
+                return state.loadedMeetups.find((meetup)=>{ 
                     return meetup.id === meetupId
                 });
             }
@@ -97,6 +97,7 @@ export const store = new Vuex.Store ({
                         description: obj[key].description,
                         imageUrl: obj[key].imageUrl,
                         date: obj[key].date,
+                        location: obj[key].location,
                         creatorId: obj[key].creatorId
                     })
                 }
@@ -109,27 +110,60 @@ export const store = new Vuex.Store ({
             });
         },
         createMeetup( {commit, getters}, payload ){
+            //Store values except image in DB.
+           
             const meetup = {
                 title: payload.title,
                 location: payload.location,
-                imageUrl: payload.imageUrl,
                 description: payload.description,
                 date: payload.date.toISOString(),
-                creatorId: getters.user.id
-                
+                creatorId: getters.user.id   
             } 
+
             //Reach out to firebase and store meetup.
+            let imageUrl;
+            let key;
+            //Push values to firebase db
             firebase.database().ref('meetups').push(meetup)
             .then((data)=>{
-                const key = data.key;
-                console.log(data);
-                commit('createMeetup', {...meetup, id: key});
-            }).catch((err)=>{
+                key = data.key;
+                //Key is the id of the entry.
+                return key;
+            })
+            //key is made available after its returned above.
+            .then(key=>{
+                //Get image file name and extention so we can push to the storage.
+                const fileName = payload.image.name;
+                const ext = fileName.slice(fileName.lastIndexOf('.'));
+                return firebase.storage().ref('meetups/' + key + ext).put(payload.image);
+            })
+            //this process returns a promise so we chain a 'then' and return the process.
+            //this promise also contains results of the image stored.
+            .then(fileData=>{
+                
+                //obtain url pointing to our stored file
+                console.log("the Value: ", fileData);
+                firebase.storage().ref().child(fileData.ref.fullPath).getDownloadURL()
+                .then(url=>{
+                    imageUrl = url;
+                    console.log(imageUrl);
+                    return imageUrl 
+                })
+                .then((imageUrl)=>{
+                    //Once url is obtained, we update the imageUrl value on the DB
+                    firebase.database().ref('meetups').child(key).update({imageUrl: imageUrl});
+                    return imageUrl;
+                })
+                .then((imageUrl)=>{
+                    commit('createMeetup', {...meetup, id: key, imageUrl: imageUrl});
+                })
+            })
+            .catch((err)=>{
                 console.log(err);
             })
-            
         },
 
+        
         signUserUp({commit}, payload){
             commit('setLoading', true);
             commit('setError');

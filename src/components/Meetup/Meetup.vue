@@ -9,7 +9,7 @@
                 <v-img :src="meetup.imageUrl"></v-img>
                 <v-card-text>
                      
-                        <v-flex class="indigo white--text mb-4" xs3>{{meetup.date | date}}</v-flex>
+                        <v-flex class="indigo white--text mb-4" xs3>{{meetup.date | date}} | {{meetup.location}}</v-flex>
                     
                     <div class="text-md-left">
                         <p>{{meetup.description}}</p>

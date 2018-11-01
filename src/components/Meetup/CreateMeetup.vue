@@ -33,14 +33,9 @@
                        </v-flex>
                    </v-layout>
                    <v-layout row>
-                       <v-flex xs12 sm6 offset-sm3>
-                           <v-text-field 
-                           name="imageUrl"
-                           label="Image Url"
-                           id="imageUrl"
-                           v-model="imageUrl"
-                           required>
-                           </v-text-field>
+                       <v-flex xs12 sm6 offset-sm1>
+                           <v-btn raised class="primary" @click="onPickFile">Upload Image</v-btn>
+                           <input type="file" style="display: none;" ref="fileInput" accept="image/*" @change="filePicked">
                        </v-flex>
                    </v-layout>
                     <v-layout row>
@@ -105,6 +100,7 @@ export default {
             location: '',
             description: '',
             imageUrl: '',
+            image: null,
             date: '',
             time: new Date()
         }
@@ -130,15 +126,42 @@ export default {
     },
     methods:{
         onCreateMeetup(){
+            if(!this.image){
+                return ; 
+            }
             const meetupData = {
                 title: this.title,
                 location: this.location,
-                imageUrl: this.imageUrl,
+                image: this.image,
                 description: this.description,
                 date: this.submitDate
             }
             this.$store.dispatch('createMeetup', meetupData);
             this.$router.push('/meetups');
+        },
+        onPickFile(){
+            this.$refs.fileInput.click();   
+        },
+        filePicked(event){
+            const files = event.target.files;
+            console.log(files);
+            let fileName = files[0].name;
+            if(fileName.lastIndexOf('.') <= 0){
+                return alert('Please add a valid image file!');
+            }
+            //Call filereader constructor
+            const fileReader = new FileReader();
+
+            //Async 'on load' listener that returns base64 repre. of the image.
+            fileReader.addEventListener('load', ()=>{
+                this.imageUrl = fileReader.result
+            })
+            
+            //triggers an event listener
+            fileReader.readAsDataURL(files[0]);
+
+            //Keep raw image file for db storage
+            this.image = files[0];
         }
     }
 }
