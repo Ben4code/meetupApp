@@ -7,11 +7,13 @@ import { store } from './store'
 import DateFilter from './filters/date';
 import * as firebase from 'firebase';
 import AlertComp from './components/Shared/Alert.vue';
+import EditDialog from './components/Meetup/Edit/EditMeetupDetails.vue';
 
 Vue.use(Vuetify)
 Vue.config.productionTip = false
 Vue.filter('date', DateFilter);
 Vue.component('app-alert', AlertComp);
+Vue.component('app-edit', EditDialog);
 
 new Vue({
   router,

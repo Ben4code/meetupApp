@@ -1,17 +1,30 @@
 <template>
     <div>
         <v-container grid-list-md text-xs-center>
-            <v-layout row wrap >
+            <v-layout row v-if="loading">
+                <v-flex xs12 sm6 offset-sm3>
+                    <v-progress-circular
+                        :size="70"
+                        :width="7"
+                        color="blue"
+                        indeterminate
+                        v-if="loading"
+                    ></v-progress-circular>
+                </v-flex>
+            </v-layout>
+            <v-layout row wrap v-else>
                 <v-flex v-for="meetup in meetups" :key="meetup.id" xs4>
                     <v-card class="light-blue accent-3 mb-4" >
-                        <v-img
-                            :src="meetup.imageUrl"
-                            height="250px"
-                            cover>
-                        </v-img>
+                        <router-link :to="`/meetups/${meetup.id}`">    
+                            <v-img
+                                :src="meetup.imageUrl"
+                                height="250px"
+                                cover>
+                            </v-img>
+                        </router-link>
                         <v-card-title primary-title>
                             <div>
-                                <h3 class="white--text">{{meetup.title}}</h3> 
+                                <h3 class="white--text" :to="`/meetups/${meetup.id}`">{{meetup.title}}</h3> 
                                 <div>{{meetup.date | date}}</div>
                             </div>
                         </v-card-title><hr>
@@ -35,6 +48,9 @@ export default {
   computed: {
     meetups() {
       return this.$store.getters.loadedMeetups;
+    },
+    loading(){
+        return this.$store.getters.loading;
     }
   }
 };

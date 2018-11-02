@@ -11,7 +11,6 @@ import Signup from '@/components/User/Signup.vue'
 import Signin from '@/components/User/Signin.vue'
 import AuthGuard from '@/router/auth-guard';
 
-
 Vue.use(Router)
 
 export default new Router({
